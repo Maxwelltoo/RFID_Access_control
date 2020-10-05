@@ -1,7 +1,7 @@
 //#include "stm32f10x_gpio.h"
 //#include "stm32f10x_rcc.h"
-#include "main.h"
-#include "mfrc522.h"
+#include "../Inc/MAIN.h"
+#include "../Inc/MFRC522.h"
 //#include <string.h> 
 
 #define MAXRLEN 18
