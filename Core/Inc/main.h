@@ -58,8 +58,22 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define SPI1_NSS_Pin GPIO_PIN_4
+#define SPI1_NSS_GPIO_Port GPIOA
+#define SPI1_RST_Pin GPIO_PIN_0
+#define SPI1_RST_GPIO_Port GPIOB
+#define Buzzer_Pin GPIO_PIN_4
+#define Buzzer_GPIO_Port GPIOB
+#define Servo_Pin GPIO_PIN_6
+#define Servo_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
+#define RST_H            HAL_GPIO_WritePin(SPI1_RST_GPIO_Port, SPI1_RST_Pin, GPIO_PIN_SET)
+#define RST_L            HAL_GPIO_WritePin(SPI1_RST_GPIO_Port, SPI1_RST_Pin, GPIO_PIN_RESET)
+#define NSS_H            HAL_GPIO_WritePin(SPI1_NSS_GPIO_Port, SPI1_NSS_Pin, GPIO_PIN_SET)
+#define NSS_L            HAL_GPIO_WritePin(SPI1_NSS_GPIO_Port, SPI1_NSS_Pin, GPIO_PIN_RESET)
 
+#define TRUE 1
+#define FALSE 0
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

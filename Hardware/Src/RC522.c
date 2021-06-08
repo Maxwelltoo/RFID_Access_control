@@ -1,7 +1,8 @@
 //#include "stm32f10x_gpio.h"
 //#include "stm32f10x_rcc.h"
-#include "../Inc/MAIN.h"
-#include "../Inc/MFRC522.h"
+#include "main.h"
+#include "spi.h"
+#include "MFRC522.h"
 //#include <string.h> 
 
 #define MAXRLEN 18
@@ -276,7 +277,7 @@ char PcdReset(void)
     RST_H;
 	delay_10ms(10);
 	
-		if(ReadRawRC(0x02) == 0x80)
+/*		if(ReadRawRC(0x02) == 0x80)
 		{
 			LED_ON;
 			delay_10ms(10);	
@@ -286,7 +287,7 @@ char PcdReset(void)
 			delay_10ms(10);	
 			LED_OFF;
 			delay_10ms(10);	
-		}
+		}*/
 
     WriteRawRC(CommandReg,PCD_RESETPHASE);
     
@@ -354,13 +355,13 @@ char M500PcdConfigISOType(unsigned char type)
 /////////////////////////////////////////////////////////////////////
 unsigned char ReadRawRC(unsigned char Address)
 {
-    unsigned char i, ucAddr;
+    unsigned char ucAddr;
     unsigned char ucResult=0;
 
     NSS_L;
     ucAddr = ((Address<<1)&0x7E)|0x80;
 
-    for(i=8;i>0;i--)
+/*    for(i=8;i>0;i--)
     {
         SCK_L;
 	 	if(ucAddr&0x80)
@@ -369,19 +370,21 @@ unsigned char ReadRawRC(unsigned char Address)
 				MOSI_L;
         SCK_H;
         ucAddr <<= 1;
-    }
+    }*/
+    HAL_SPI_Transmit(&hspi1, &ucAddr, 1, 1000);
 
-    for(i=8;i>0;i--)
+/*    for(i=8;i>0;i--)
     {
         SCK_L;
         ucResult <<= 1;
         SCK_H;
 		if(READ_MISO == 1)
      	    ucResult |= 1;
-    }
+    }*/
+    HAL_SPI_Receive(&hspi1, &ucResult, 1, 1000);
 
     NSS_H;
-    SCK_H;
+
     return ucResult;
 }
 
@@ -392,13 +395,13 @@ unsigned char ReadRawRC(unsigned char Address)
 /////////////////////////////////////////////////////////////////////
 void WriteRawRC(unsigned char Address, unsigned char value)
 {  
-    unsigned char i, ucAddr;
+    unsigned char ucAddr;
 
-    SCK_L;
+    //SCK_L;
     NSS_L;
     ucAddr = ((Address<<1)&0x7E);
 
-    for(i=8;i>0;i--)
+/*    for(i=8;i>0;i--)
     {
 		if(ucAddr&0x80)
         	MOSI_H;
@@ -407,9 +410,10 @@ void WriteRawRC(unsigned char Address, unsigned char value)
         SCK_H;
         ucAddr <<= 1;
         SCK_L;
-    }
+    }*/
+    HAL_SPI_Transmit(&hspi1, &ucAddr, 1, 1000);
 
-    for(i=8;i>0;i--)
+/*    for(i=8;i>0;i--)
     {
 		if(value&0x80)
         	MOSI_H;
@@ -418,9 +422,10 @@ void WriteRawRC(unsigned char Address, unsigned char value)
         SCK_H;
         value <<= 1;
         SCK_L;
-    }
+    }*/
+    HAL_SPI_Transmit(&hspi1, &value, 1, 1000);
     NSS_H;
-    SCK_H;
+    //SCK_H;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -592,10 +597,11 @@ void WaitCardOff(void)
 ///////////////////////////////////////////////////////////////////////
 void delay_10ms(unsigned int _10ms)
 {
-	unsigned int i, j;
+	/*unsigned int i, j;
 
 	for(i=0; i<_10ms; i++)
 	{
 		for(j=0; j<60000; j++);
-	}
+	}*/
+	HAL_Delay(10*_10ms);
 }
