@@ -19,6 +19,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "i2c.h"
 #include "spi.h"
 #include "tim.h"
 #include "usart.h"
@@ -26,6 +27,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "OLED.h"
 #include "Servo.h"
 #include "Buzzer.h"
 #include "MFRC522.h"
@@ -90,6 +92,7 @@ void RC522_Init()
 int main(void)
 {
   /* USER CODE BEGIN 1 */
+	//uint16_t compare_value;
 	char status;
 	unsigned char TagType[2], SelectedSnr[4];
 	//unsigned char snr, buf[16], TagType[2], SelectedSnr[4]; // 扇区号，扇区数据，卡类型，卡序列
@@ -123,15 +126,18 @@ int main(void)
   MX_USART1_UART_Init();
   MX_TIM4_Init();
   MX_TIM3_Init();
+  MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
   RC522_Init();
+  OLED_init();
   HAL_TIM_Base_Start(&htim3);
   HAL_TIM_Base_Start(&htim4);
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_1);
   HAL_TIM_PWM_Start(&htim4, TIM_CHANNEL_1);
   Beep_Start();
-  Beep_Welcome();
-  OpenDoor();
+  OLED_Start();
+  HAL_Delay(3200);
+  OLED_Wait();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -141,11 +147,11 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
+	//compare_value=__HAL_TIM_GET_COMPARE(&htim4, TIM_CHANNEL_1);
 	status= PcdRequest(REQ_ALL,TagType);   // 唤醒卡片
 	if(!status){
 		status = PcdAnticoll(SelectedSnr); // 防冲
 		printf("\r\n Request succeeded!\r\n");
-
 		unsigned char i,j;
 		unsigned char key;
 		for(i=0;i<4;i++){         // 历数每一个已知UID
@@ -156,17 +162,22 @@ int main(void)
 				}
 				if(j==3){         // 完全匹配
 					key = 1;
+					OLED_Welcome();
 					Beep_Welcome();
 					OpenDoor();
-					printf("\r\n Welcome!\r\n");
+					OLED_Wait();
+					//printf("\r\n Welcome!\r\n");
 				}
 			}
 			if(key==1){           // 认证成功
 				break;
 			}
 			else if(i==3){        // 未知UID
+				OLED_Error();
 				Beep_Error();
-				printf("\r\n Unknown identity!\r\n");
+				HAL_Delay(3200);
+				OLED_Wait();
+				//printf("\r\n Unknown identity!\r\n");
 			}
 		}
 		/*if(!status){
